@@ -43,12 +43,11 @@ def get_odds():
     url = odds_url(odds_dic)
     data = general_get_req(url)
     test_game = data[0]
-    return 1
-    # for bet in data:
-    #     print(bet, end='\n\n')
+    print(test_game)
+    return None
 
 def main():
-    # get_sports_list()
+    get_sports_list()
     get_odds()
 
 if __name__ == '__main__':
