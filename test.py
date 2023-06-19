@@ -59,19 +59,80 @@ def get_sports_list():
     f = lambda x: x["key"]
     return list(map(f, data))
 
-def EV(o1, o2):
-    return (1/o1) + (1/o2)
+"""
+Returns the sum of reciprocals of the given outcomes
+NOTE: used to calculate expected value of n-many outcomes
+    eg: if 1/o1 + 1/o2 < 1, arbitrage opportunity
+"""
+def get_EV(*outcomes):
+    total = 0
+    for o in outcomes:
+        total += (1/o)
+    return total
 
+"""
+Returns all pairs (2-tuples) of outcomes
+"""
+def get_outcome_pairs(o1s, o2s):
+    pairs = []
+    n = 2
+    if len(o1s) != n or len(o2s) != n:
+        return None
+    for i in range(n):
+        for j in range(n):
+            if i != j:
+                pairs.append((o1s[i], o2s[j]))
+    return pairs
+
+"""
+Returns all triples (3-tuples) of outcomes
+"""
+def get_outcome_trips(o1s, o2s, o3s):
+    trips = []
+    n = 3
+    if len(o1s) != n or len(o2s) != n or len(o3s) != n:
+        return None
+
+    for i in range(n):
+        for j in range(n):
+            for k in range(n):
+                if i != j and j != k and i != k:
+                    trips.append(o1s[i], o2s[j], o3s[k])
+    return trips
+
+"""
+TODO:
+    -works for 2-outcome (ie: WIN/LOSS)
+    -now make work for 3-outcome (ie: WIN/LOSS/DRAW)
+"""
+def get_outcome_arbs(b1_key, b1_outs, b2_key, b2_outs, limit=1):
+    pairs = get_outcome_pairs(b1_outs, b2_outs)
+    arbs = []
+    for bet1, bet2 in pairs:
+        ev = get_EV(bet1["price"], bet2["price"])
+        if ev < limit:
+            arbs.append(build_arb(ev, b1_key, bet1, b2_key, bet2))
+    return arbs
+
+"""
+Returns an 'arb', which is a dictionary holding the expected
+value and bookie data of a given arbitrage opportunity
+"""
 def build_arb(ev, bookie1, bet1, bookie2, bet2):
-    b1 = {"key": bookie1, "team": bet1["name"], "price": bet1["price"]}
-    b2 = {"key": bookie2, "team": bet2["name"], "price": bet2["price"]}
+    b1 = {"bookie_name": bookie1, "team": bet1["name"], "price": bet1["price"]}
+    b2 = {"bookie_name": bookie2, "team": bet2["name"], "price": bet2["price"]}
     return {"ev": ev, "bookie1": b1, "bookie2": b2}
+
 
 """
 For a given game, find all arbs between the markets
 of different bookies
 
 NOTE: find outline of JSON structure at EOF
+
+TODO:
+    -works for 2-outcome (ie: WIN/LOSS)
+    -now make work for 3-outcome (ie: WIN/LOSS/DRAW)
 """
 def find_game_arbs(game):
     bookmakers = game.get("bookmakers", None)
@@ -88,48 +149,61 @@ def find_game_arbs(game):
     for i in range(n):
         b1 = bookmakers[i]
         b1_markets = b1.get("markets", None)
-
-        ## handle empty markets
         if not b1_markets or len(b1_markets) == 0: 
-            # print(no_market_offered_err(game, bookmakers[i]))
+            continue
+
+        b1_outs = b1_markets[0]["outcomes"]
+        if not b1_outs:
             continue
 
         for j in range(i+1, n):
             b2 = bookmakers[j]
             b2_markets = b2.get("markets", None)
-
-            ## handle empty markets
             if not b2_markets or len(b2_markets) == 0: 
-                # print(no_market_offered_err(game, bookmakers[j]))
+                continue
+                
+            b2_outs = b2_markets[0]["outcomes"]
+            if not b2_outs:
                 continue
 
-            b1_home = b1_markets[0]["outcomes"][0]; b1_away = b1_markets[0]["outcomes"][1]
-            b2_home = b2_markets[0]["outcomes"][1]; b2_away = b2_markets[0]["outcomes"][1]
-
-            ## calculate and add arbs
-            """
-            TODO:
-                -currently assumes home team listed first and away second
-                -this is actually not guaranteed, so need to account for this
-            """
-            ev1 = EV(b1_home["price"], b2_away["price"])
-            ev2 = EV(b1_away["price"], b2_home["price"])
-            limit = 1.01
-            if ev1 < limit:
-                arbs.append(build_arb(ev1, b1["key"], b1_home, b2["key"], b2_away))
-            if ev2 < limit:
-                arbs.append(build_arb(ev2, b1["key"], b1_away, b2["key"], b2_home))
+            res = get_outcome_arbs(b1["key"], b1_outs, b2["key"], b2_outs, limit=1.01)
+            arbs += res
+        
     return arbs
 
+"""
+Write all possible sports to a file 'sports_list'
+NOTE: so we don't torch our API limit before
+      we've got a db up and running 
+"""
+def write_sports_to_file():
+    all_sport_keys = get_sports_list()
+    filename = "sports_list.txt"
+    f = open(filename, "w")
+    for sport in all_sport_keys:
+        f.write(str(sport) + '\n')
+    f.close()
+
 def main():
-    all_sport_keys = get_sports_list() ## all available sports
-    sport = "soccer_sweden_allsvenskan" ## sample sport
-    test_sport = {"sport_key": sport, "regions": "au", "markets": "h2h"}
+    first_time = False ## NOTE : SET TRUE ONLY FOR FIRST RUN : NOTE
+    if first_time:
+        write_sports_to_file()
+        
+    sport_ind = 0
+    sample_sports = ["aussierules_afl", "rugbyleague_nrl", "boxing_boxing", "soccer_sweden_allsvenskan"]
+    test_sport = {"sport_key": sample_sports[0], "regions": "au", "markets": "h2h"}
+
     url = odds_url(test_sport)
     data = general_get_req(url)
+
     for game in data:
         arbs = find_game_arbs(game)
-        print(arbs, end="\n\n")
+        for arb in arbs:
+            if len(arbs) > 0:
+                print(game_to_str(game), end="\n\n")
+                print(arb)
+                print("-------\n")
+    return 0
 
 if __name__ == '__main__':
     main()
