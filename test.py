@@ -3,6 +3,7 @@ import requests
 import json
 from dotenv import load_dotenv
 import textwrap
+from itertools import combinations
 
 # Load the environment variables from the .env file
 load_dotenv('.env')
@@ -97,43 +98,55 @@ def get_outcome_trips(o1s, o2s, o3s):
         for j in range(n):
             for k in range(n):
                 if i != j and j != k and i != k:
-                    trips.append(o1s[i], o2s[j], o3s[k])
+                    trips.append((o1s[i], o2s[j], o3s[k]))
     return trips
 
-"""
-TODO:
-    -works for 2-outcome (ie: WIN/LOSS)
-    -now make work for 3-outcome (ie: WIN/LOSS/DRAW)
-"""
-def get_outcome_arbs(b1_key, b1_outs, b2_key, b2_outs, limit=1):
-    pairs = get_outcome_pairs(b1_outs, b2_outs)
-    arbs = []
-    for bet1, bet2 in pairs:
-        ev = get_EV(bet1["price"], bet2["price"])
-        if ev < limit:
-            arbs.append(build_arb(ev, b1_key, bet1, b2_key, bet2))
-    return arbs
+def get_outcome_combos(outcomes, n):
+    ## check all same number of outcomes
+    if any(len(outcome) != n for outcome in outcomes):
+        return None
+
+    if n == 2:
+        return get_outcome_pairs(*outcomes)
+    if n == 3:
+        return get_outcome_trips(*outcomes)
+
+    return None
+
+def get_n_tuple_combos(length, n):
+    els = [i for i in range(length)]
+    return list(combinations(els, n))
 
 """
 Returns an 'arb', which is a dictionary holding the expected
 value and bookie data of a given arbitrage opportunity
 """
-def build_arb(ev, bookie1, bet1, bookie2, bet2):
-    b1 = {"bookie_name": bookie1, "team": bet1["name"], "price": bet1["price"]}
-    b2 = {"bookie_name": bookie2, "team": bet2["name"], "price": bet2["price"]}
-    return {"ev": ev, "bookie1": b1, "bookie2": b2}
+def build_arb(ev, bookie_bet_combos):
+    arb = {"ev": ev}
+    for bookie, bet in bookie_bet_combos:
+        arb[bookie["key"]] = {"team": bet["name"], "price": bet["price"]}
+    return arb
 
+def check_bookie_valid(bookie):
+    markets = bookie.get("markets", None)
+    return (markets != None and 
+            len(markets) != 0 and
+            markets[0]["outcomes"] != None)
 
-"""
-For a given game, find all arbs between the markets
-of different bookies
+def get_outcome_arbs(bookies, limit=1):
+    outcomes = [b["markets"][0]["outcomes"] for b in bookies]
+    outcome_combos = get_outcome_combos(outcomes, len(outcomes[0]))
+    if not outcome_combos:
+        return []
 
-NOTE: find outline of JSON structure at EOF
+    arbs = []
+    for combo in outcome_combos:
+        prices = [o["price"] for o in combo]
+        ev = get_EV(*prices)
+        if ev < limit:
+            arbs.append(build_arb(ev, zip(bookies, combo)))
+    return arbs
 
-TODO:
-    -works for 2-outcome (ie: WIN/LOSS)
-    -now make work for 3-outcome (ie: WIN/LOSS/DRAW)
-"""
 def find_game_arbs(game):
     bookmakers = game.get("bookmakers", None)
 
@@ -145,30 +158,15 @@ def find_game_arbs(game):
     arbs = []
     n = len(bookmakers)
 
-    ## retreive h2h markets offered by all pairs of bookies
-    for i in range(n):
-        b1 = bookmakers[i]
-        b1_markets = b1.get("markets", None)
-        if not b1_markets or len(b1_markets) == 0: 
+    num_outcomes = 3
+    ind_combos = get_n_tuple_combos(n, num_outcomes)
+    
+    for inds in ind_combos:
+        bookies = [bookmakers[x] for x in inds]
+        if False in list(map(check_bookie_valid, bookies)):
             continue
-
-        b1_outs = b1_markets[0]["outcomes"]
-        if not b1_outs:
-            continue
-
-        for j in range(i+1, n):
-            b2 = bookmakers[j]
-            b2_markets = b2.get("markets", None)
-            if not b2_markets or len(b2_markets) == 0: 
-                continue
-                
-            b2_outs = b2_markets[0]["outcomes"]
-            if not b2_outs:
-                continue
-
-            res = get_outcome_arbs(b1["key"], b1_outs, b2["key"], b2_outs, limit=1.01)
-            arbs += res
-        
+        new_arbs = get_outcome_arbs(bookies, limit=1)
+        arbs += new_arbs
     return arbs
 
 """
@@ -189,9 +187,9 @@ def main():
     if first_time:
         write_sports_to_file()
         
-    sport_ind = 0
+    sport_ind = 2
     sample_sports = ["aussierules_afl", "rugbyleague_nrl", "boxing_boxing", "soccer_sweden_allsvenskan"]
-    test_sport = {"sport_key": sample_sports[0], "regions": "au", "markets": "h2h"}
+    test_sport = {"sport_key": sample_sports[sport_ind], "regions": "au", "markets": "h2h"}
 
     url = odds_url(test_sport)
     data = general_get_req(url)
