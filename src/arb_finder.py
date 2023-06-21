@@ -9,8 +9,10 @@ def get_sports_list(filename=None):
     sports = []
 
     if filename: ## retreive from file
-        with open(file_path, "r") as file:
+        with open(filename, "r") as file:
             for line in file:
+                if line.startswith("## "): ## commented out sport
+                    continue
                 line = line.strip()  
                 sports.append(line)
 
@@ -122,18 +124,42 @@ def get_outcome_arbs(bookies, limit=1):
             arbs.append(build_arb(ev, zip(bookies, combo)))
     return arbs
 
+"""
+Returns the most frequent element of a list
+"""
+def most_frequent_element(lst):
+    frequency = {}
+    max_count = 0
+    most_frequent = None
+    
+    for element in lst:
+        if element in frequency:
+            frequency[element] += 1
+        else:
+            frequency[element] = 1
+        
+        if frequency[element] > max_count:
+            max_count = frequency[element]
+            most_frequent = element
+    
+    return most_frequent
+
+def find_num_outcomes(bookies):
+    num_outcomes = [len(b["markets"][0]["outcomes"]) for b in bookies]
+    return most_frequent_element(num_outcomes)
+
 def find_game_arbs(game, limit=1):
-    bookmakers = game.get("bookmakers", None)
+    bookmakers = game.get("bookmakers", [])
 
     ## handle empty bookmakers
-    if not bookmakers:
+    if len(bookmakers) <= 1:
         # print(no_bookies_found_err(game))
         return None
 
     arbs = []
     n = len(bookmakers)
 
-    num_outcomes = 2 ## TODO: change according to sport
+    num_outcomes = find_num_outcomes(bookmakers)
     ind_combos = get_n_tuple_combos(n, num_outcomes)
     
     for inds in ind_combos:
@@ -147,7 +173,7 @@ def find_game_arbs(game, limit=1):
 def find_sport_arbs(all_games_data, limit=1):
     for game in all_games_data:
         arbs = find_game_arbs(game, limit=limit)
-        if len(arbs) > 0:
+        if arbs and len(arbs) > 0:
             for arb in arbs:
                 print(msgs.arb_to_str(arb, game))
     return None
@@ -156,20 +182,24 @@ def find_arbs_all_sports(sport_keys, regions, markets, limit=1, sport_file=None)
     sport_obj = {"sport_key": None, "regions": regions, "markets": markets}
 
     for s_key in sport_keys:
+        print(msgs.checking_sport(s_key))
         sport_obj["sport_key"] = s_key
         url = reqs.odds_url(sport_obj)
         data = reqs.general_get_req(url)
+        if not data:
+            # print(msgs.no_sport_data_found_err(s_key))
+            continue
         find_sport_arbs(data, limit=limit)
     return None
 
 def main():
     first_time = False ## NOTE CHANGE TO TRUE IF FIRST TIME RUNNING NOTE ##
-    testing = True ## NOTE CHANGE TO TRUE IF WANT TO FULLY SEARCH FOR ABRS NOTE ##
+    testing = False ## NOTE CHANGE TO TRUE IF WANT TO FULLY SEARCH FOR ABRS NOTE ##
     regions = "au"
     markets = "h2h"
     limit = 1.01
 
-    sport_file = "sports_list.txt"
+    sport_file = "src/utils/sports_list.txt"
     if first_time:
         write_sports_to_file(sport_file)
     

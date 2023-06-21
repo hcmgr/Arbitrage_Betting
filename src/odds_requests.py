@@ -20,7 +20,7 @@ def general_get_req(url):
     if response.status_code == 200:
         return response.json()
     else:
-        print("Request failed with code: ", response.status_code)
+        print("Request failed with code: ", response.status_code, end="\n\n")
         return None
 
 def sports_url():

@@ -3,6 +3,15 @@
 Handles all error messages and encodings
 """
 
+def divider():
+    return "--------------\n"
+
+def checking_sport(sport_key):
+    msg = (
+        f"""Checking {sport_key} for arb opporunities... \n"""
+    )
+    return msg
+
 def game_to_str(game):
     msg = (
         f"""    id: {game["id"]} \n"""
@@ -16,6 +25,12 @@ def arb_to_str(arb, game):
         f"""{game_to_str(game)}\n\n"""
         f"""{arb}"""
         f"""---------\n"""
+    )
+    return msg
+
+def no_sport_data_found_err(sport_key):
+    msg = (
+        f"""No odds found for {sport_key}\n"""
     )
     return msg
 
