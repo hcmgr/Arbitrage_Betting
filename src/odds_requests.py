@@ -1,11 +1,11 @@
-import requests
-import os
-from dotenv import load_dotenv
-
 ### requests.py ###
 """
 Handles all requests made to Odds API
 """
+
+import requests
+import os
+from dotenv import load_dotenv
 
 # Load the environment variables from the .env file
 load_dotenv('.env')

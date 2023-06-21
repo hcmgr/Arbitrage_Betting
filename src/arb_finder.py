@@ -1,3 +1,9 @@
+### arb_finder.py ###
+
+"""
+Main driver code of project
+"""
+
 import json
 import textwrap
 from itertools import combinations
@@ -195,9 +201,9 @@ def find_arbs_all_sports(sport_keys, regions, markets, limit=1, sport_file=None)
 def main():
     first_time = False ## NOTE CHANGE TO TRUE IF FIRST TIME RUNNING NOTE ##
     testing = False ## NOTE CHANGE TO TRUE IF WANT TO FULLY SEARCH FOR ABRS NOTE ##
-    regions = "au"
+    regions = "au,eu,us,us2,uk"
     markets = "h2h"
-    limit = 1.01
+    limit = 1
 
     sport_file = "src/utils/sports_list.txt"
     if first_time:
