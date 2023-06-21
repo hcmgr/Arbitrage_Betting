@@ -3,6 +3,10 @@
 Handles all requests made to Odds API
 """
 
+from dotenv import load_dotenv
+import os
+import requests
+
 # Load the environment variables from the .env file
 load_dotenv('.env')
 
