@@ -1,5 +1,6 @@
 .env
 venv
 sports_list.txt
+__pycache__
 
 
