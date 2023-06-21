@@ -1,3 +1,7 @@
+import requests
+import os
+from dotenv import load_dotenv
+
 ### requests.py ###
 """
 Handles all requests made to Odds API

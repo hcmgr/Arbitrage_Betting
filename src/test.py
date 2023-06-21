@@ -1,12 +1,9 @@
-import os
-import requests
 import json
-from dotenv import load_dotenv
 import textwrap
 from itertools import combinations
 
 import messages as msgs
-import requests as reqs
+import odds_requests as reqs
 
 def get_sports_list(filename=None):
     sports = []
@@ -152,7 +149,7 @@ def find_sport_arbs(all_games_data, limit=1):
         arbs = find_game_arbs(game, limit=limit)
         if len(arbs) > 0:
             for arb in arbs:
-                print(arb_to_str(arb, game))
+                print(msgs.arb_to_str(arb, game))
     return None
 
 def find_arbs_all_sports(sport_keys, regions, markets, limit=1, sport_file=None):
@@ -161,10 +158,9 @@ def find_arbs_all_sports(sport_keys, regions, markets, limit=1, sport_file=None)
     for s_key in sport_keys:
         sport_obj["sport_key"] = s_key
         url = reqs.odds_url(sport_obj)
-        data = general_get_req(url)
+        data = reqs.general_get_req(url)
         find_sport_arbs(data, limit=limit)
     return None
-
 
 def main():
     first_time = False ## NOTE CHANGE TO TRUE IF FIRST TIME RUNNING NOTE ##
@@ -184,6 +180,5 @@ def main():
     
     find_arbs_all_sports(sport_keys, regions, markets, limit=limit)
     
-
 if __name__ == '__main__':
     main()
