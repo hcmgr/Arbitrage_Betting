@@ -1,0 +1,31 @@
+## NOTE: below is the JSON structure of a game ##
+
+"""
+Odds json 'game' structure:
+    game (a given game ie: data[0], where data == the raw HTTP request data)
+
+        id
+
+        sport_key
+
+        sport_title
+
+        commence_time
+
+        home_team
+
+        away_team
+
+        bookmakers
+            bookie (ie: unibet, neds etc.)
+                {
+                    ...
+                    ...
+                    markets (list of dicts, usually len 1 (just h2h))
+                        market (dic rep. given market, again, usually h2h)
+                            ...
+                            ...
+                            outcomes (len 2 list)
+                                home odds
+                                away odds
+                }

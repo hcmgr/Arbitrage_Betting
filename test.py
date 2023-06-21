@@ -5,60 +5,38 @@ from dotenv import load_dotenv
 import textwrap
 from itertools import combinations
 
-# Load the environment variables from the .env file
-load_dotenv('.env')
+import messages as msgs
+import requests as reqs
 
-# Read the API key from the environment variables
-api_key = os.getenv('ODDS_API_KEY')
+def get_sports_list(filename=None):
+    sports = []
 
-HOST = "https://api.the-odds-api.com"
+    if filename: ## retreive from file
+        with open(file_path, "r") as file:
+            for line in file:
+                line = line.strip()  
+                sports.append(line)
 
-def general_get_req(url):
-    response = requests.get(url)
-    if response.status_code == 200:
-        return response.json()
-    else:
-        print("Request failed with code: ", response.status_code)
-        return None
+    else: ## retreive from API
+        url = reqs.sports_url()
+        data = reqs.general_get_req(url)
+        f = lambda x: x["key"]
+        sports = list(map(f, data))
 
-def sports_url():
-    return HOST + f"/v4/sports/?apiKey={api_key}"
+    return sports
 
-def odds_url(odds_dic: dict[str: str]):
-    return (HOST +
-        f'''/v4/sports/{odds_dic["sport_key"]}/odds/'''
-        f'''?apiKey={api_key}'''
-        f'''&regions={odds_dic["regions"]}'''
-        f'''&markets={odds_dic["markets"]}''')
-
-def game_to_str(game):
-    msg = (
-        f"""    id: {game["id"]} \n"""
-        f"""    sport_key: {game["sport_key"]} \n"""
-        f"""    game: {game["home_team"]} vs {game["away_team"]}"""
-    )
-    return msg
-
-def no_bookies_found_err(game):
-    msg = (
-        f"""No bookmakers offered for following game: \n"""
-        f"""{game_to_str(game)}"""
-    )
-    return msg
-
-def no_market_offered_err(game, bookmaker):
-    msg = (
-        f"""Bookmaker: {bookmaker["key"]}\n"""
-        f"""offers no markets for the following game: \n"""
-        f"""{game_to_str(game)}"""
-    )
-    return msg
-
-def get_sports_list():
-    url = sports_url()
-    data = general_get_req(url)
-    f = lambda x: x["key"]
-    return list(map(f, data))
+"""
+Write all possible sports to a file 'sports_list'
+NOTE: so we don't torch our API limit before
+      we've got a db up and running 
+"""
+def write_sports_to_file():
+    all_sport_keys = get_sports_list()
+    filename = "utils/sports_list.txt"
+    f = open(filename, "w")
+    for sport in all_sport_keys:
+        f.write(str(sport) + '\n')
+    f.close()
 
 """
 Returns the sum of reciprocals of the given outcomes
@@ -147,7 +125,7 @@ def get_outcome_arbs(bookies, limit=1):
             arbs.append(build_arb(ev, zip(bookies, combo)))
     return arbs
 
-def find_game_arbs(game):
+def find_game_arbs(game, limit=1):
     bookmakers = game.get("bookmakers", None)
 
     ## handle empty bookmakers
@@ -158,83 +136,54 @@ def find_game_arbs(game):
     arbs = []
     n = len(bookmakers)
 
-    num_outcomes = 3
+    num_outcomes = 2 ## TODO: change according to sport
     ind_combos = get_n_tuple_combos(n, num_outcomes)
     
     for inds in ind_combos:
         bookies = [bookmakers[x] for x in inds]
         if False in list(map(check_bookie_valid, bookies)):
             continue
-        new_arbs = get_outcome_arbs(bookies, limit=1)
+        new_arbs = get_outcome_arbs(bookies, limit=limit)
         arbs += new_arbs
     return arbs
 
-"""
-Write all possible sports to a file 'sports_list'
-NOTE: so we don't torch our API limit before
-      we've got a db up and running 
-"""
-def write_sports_to_file():
-    all_sport_keys = get_sports_list()
-    filename = "sports_list.txt"
-    f = open(filename, "w")
-    for sport in all_sport_keys:
-        f.write(str(sport) + '\n')
-    f.close()
+def find_sport_arbs(all_games_data, limit=1):
+    for game in all_games_data:
+        arbs = find_game_arbs(game, limit=limit)
+        if len(arbs) > 0:
+            for arb in arbs:
+                print(arb_to_str(arb, game))
+    return None
+
+def find_arbs_all_sports(sport_keys, regions, markets, limit=1, sport_file=None):
+    sport_obj = {"sport_key": None, "regions": regions, "markets": markets}
+
+    for s_key in sport_keys:
+        sport_obj["sport_key"] = s_key
+        url = reqs.odds_url(sport_obj)
+        data = general_get_req(url)
+        find_sport_arbs(data, limit=limit)
+    return None
+
 
 def main():
-    first_time = False ## NOTE : SET TRUE ONLY FOR FIRST RUN : NOTE
+    first_time = False ## NOTE CHANGE TO TRUE IF FIRST TIME RUNNING NOTE ##
+    testing = True ## NOTE CHANGE TO TRUE IF WANT TO FULLY SEARCH FOR ABRS NOTE ##
+    regions = "au"
+    markets = "h2h"
+    limit = 1.01
+
+    sport_file = "sports_list.txt"
     if first_time:
-        write_sports_to_file()
-        
-    sport_ind = 2
-    sample_sports = ["aussierules_afl", "rugbyleague_nrl", "boxing_boxing", "soccer_sweden_allsvenskan"]
-    test_sport = {"sport_key": sample_sports[sport_ind], "regions": "au", "markets": "h2h"}
-
-    url = odds_url(test_sport)
-    data = general_get_req(url)
-
-    for game in data:
-        arbs = find_game_arbs(game)
-        for arb in arbs:
-            if len(arbs) > 0:
-                print(game_to_str(game), end="\n\n")
-                print(arb)
-                print("-------\n")
-    return 0
+        write_sports_to_file(sport_file)
+    
+    if testing:
+        sport_keys = ["aussierules_afl", "rugbyleague_nrl"]
+    else:
+        sport_keys = get_sports_list(sport_file)
+    
+    find_arbs_all_sports(sport_keys, regions, markets, limit=limit)
+    
 
 if __name__ == '__main__':
     main()
-
-## NOTE: below is the JSON structure of a game ##
-
-"""
-Odds json 'game' structure:
-    game (a given game ie: data[0], where data == the raw HTTP request data)
-
-        id
-
-        sport_key
-
-        sport_title
-
-        commence_time
-
-        home_team
-
-        away_team
-
-        bookmakers
-            bookie (ie: unibet, neds etc.)
-                {
-                    ...
-                    ...
-                    markets (list of dicts, usually len 1 (just h2h))
-                        market (dic rep. given market, again, usually h2h)
-                            ...
-                            ...
-                            outcomes (len 2 list)
-                                home odds
-                                away odds
-                }
-"""
