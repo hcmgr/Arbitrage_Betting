@@ -1,0 +1,5 @@
+- partition bookies into 2-outcome and 3-outcome bookies
+    - for instance:
+        - at the moment, if have majority 2-outcome bookies,
+          but some 3-outcome bookies, just ignore the 3-outcomes
+        - want to use them

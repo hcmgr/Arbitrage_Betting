@@ -11,6 +11,7 @@ from itertools import combinations
 import messages as msgs
 import odds_requests as reqs
 
+
 def get_sports_list(filename=None):
     sports = []
 
@@ -104,8 +105,8 @@ def get_n_tuple_combos(length, n):
 Returns an 'arb', which is a dictionary holding the expected
 value and bookie data of a given arbitrage opportunity
 """
-def build_arb(ev, bookie_bet_combos):
-    arb = {"ev": ev}
+def build_arb(ev, commence_time, bookie_bet_combos):
+    arb = {"ev": ev, "commence_time": commence_time}
     for bookie, bet in bookie_bet_combos:
         arb[bookie["key"]] = {"team": bet["name"], "price": bet["price"]}
     return arb
@@ -116,9 +117,9 @@ def check_bookie_valid(bookie):
             len(markets) != 0 and
             markets[0]["outcomes"] != None)
 
-def get_outcome_arbs(bookies, limit=1):
+def get_outcome_arbs(bookies, commence_time, limit=1):
     outcomes = [b["markets"][0]["outcomes"] for b in bookies]
-    outcome_combos = get_outcome_combos(outcomes, len(outcomes[0]))
+    outcome_combos = get_outcome_combos(outcomes, len(outcomes))
     if not outcome_combos:
         return []
 
@@ -127,7 +128,7 @@ def get_outcome_arbs(bookies, limit=1):
         prices = [o["price"] for o in combo]
         ev = get_EV(*prices)
         if ev < limit:
-            arbs.append(build_arb(ev, zip(bookies, combo)))
+            arbs.append(build_arb(ev, commence_time, zip(bookies, combo)))
     return arbs
 
 """
@@ -151,8 +152,9 @@ def most_frequent_element(lst):
     return most_frequent
 
 def find_num_outcomes(bookies):
-    num_outcomes = [len(b["markets"][0]["outcomes"]) for b in bookies]
-    return most_frequent_element(num_outcomes)
+    all_outcomes = [len(b["markets"][0]["outcomes"]) for b in bookies]
+    k = most_frequent_element(all_outcomes)
+    return k
 
 def find_game_arbs(game, limit=1):
     bookmakers = game.get("bookmakers", [])
@@ -172,7 +174,7 @@ def find_game_arbs(game, limit=1):
         bookies = [bookmakers[x] for x in inds]
         if False in list(map(check_bookie_valid, bookies)):
             continue
-        new_arbs = get_outcome_arbs(bookies, limit=limit)
+        new_arbs = get_outcome_arbs(bookies, game.get("commence_time", "TBD"), limit=limit)
         arbs += new_arbs
     return arbs
 
@@ -192,10 +194,18 @@ def find_arbs_all_sports(sport_keys, regions, markets, limit=1, sport_file=None)
         sport_obj["sport_key"] = s_key
         url = reqs.odds_url(sport_obj)
         data = reqs.general_get_req(url)
+        
         if not data:
             # print(msgs.no_sport_data_found_err(s_key))
             continue
         find_sport_arbs(data, limit=limit)
+    return None
+
+def lil_test(regions, markets):
+    sport_obj = {"sport_key": "upcoming", "regions": regions, "markets": markets}
+    url = reqs.attempt_url(sport_obj)
+    data = reqs.general_get_req(url)
+    print(data)
     return None
 
 def main():
@@ -203,7 +213,7 @@ def main():
     testing = False ## NOTE CHANGE TO TRUE IF WANT TO FULLY SEARCH FOR ABRS NOTE ##
     regions = "au,eu,us,us2,uk"
     markets = "h2h"
-    limit = 1
+    limit = 1.00
 
     sport_file = "src/utils/sports_list.txt"
     if first_time:
