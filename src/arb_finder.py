@@ -12,35 +12,33 @@ import messages as msgs
 import odds_requests as reqs
 
 
-def get_sports_list(filename=None):
-    sports = []
+def get_sports_list(filename, from_file=False):
+    sport_keys = []
 
-    if filename: ## retreive from file
+    if from_file: ## retreive from file
         with open(filename, "r") as file:
             for line in file:
                 if line.startswith("## "): ## commented out sport
                     continue
                 line = line.strip()  
-                sports.append(line)
+                sport_keys.append(line)
 
-    else: ## retreive from API
+    else: ## retreive from API, write to sports to file
         url = reqs.sports_url()
         data = reqs.general_get_req(url)
         f = lambda x: x["key"]
-        sports = list(map(f, data))
-
-    return sports
+        sport_keys = list(map(f, data))
+        write_sports_to_file(filename, sport_keys)
+    return sport_keys
 
 """
 Write all possible sports to a file 'sports_list'
 NOTE: so we don't torch our API limit before
       we've got a db up and running 
 """
-def write_sports_to_file():
-    all_sport_keys = get_sports_list()
-    filename = "utils/sports_list.txt"
+def write_sports_to_file(filename, sport_keys):
     f = open(filename, "w")
-    for sport in all_sport_keys:
+    for sport in sport_keys:
         f.write(str(sport) + '\n')
     f.close()
 
@@ -201,30 +199,31 @@ def find_arbs_all_sports(sport_keys, regions, markets, limit=1, sport_file=None)
         find_sport_arbs(data, limit=limit)
     return None
 
-def lil_test(regions, markets):
+def test_upcoming(regions, markets):
     sport_obj = {"sport_key": "upcoming", "regions": regions, "markets": markets}
     url = reqs.attempt_url(sport_obj)
     data = reqs.general_get_req(url)
     print(data)
     return None
 
-def main():
-    first_time = False ## NOTE CHANGE TO TRUE IF FIRST TIME RUNNING NOTE ##
-    testing = False ## NOTE CHANGE TO TRUE IF WANT TO FULLY SEARCH FOR ABRS NOTE ##
-    regions = "au,eu,us,us2,uk"
-    markets = "h2h"
-    limit = 1.00
-
-    sport_file = "src/utils/sports_list.txt"
-    if first_time:
-        write_sports_to_file(sport_file)
-    
+def arb_caller(sport_file, regions="au", markets="h2h", limit=1.0, first_time=False, testing=False):
     if testing:
         sport_keys = ["aussierules_afl", "rugbyleague_nrl"]
     else:
-        sport_keys = get_sports_list(sport_file)
+        sport_keys = get_sports_list(sport_file, not first_time)
     
-    find_arbs_all_sports(sport_keys, regions, markets, limit=limit)
+    find_arbs_all_sports(sport_keys, regions, markets, limit)
+
+def main():
+    regions = "au,eu,us,us2,uk" ## regions from which bookies operate out of
+    markets = "h2h" ## only searching head-head markets for now
+    limit = 0.98 ## max EV we consider an arb. opportunitity (NOTE: lower == more profitable)
+    first_time = False ## NOTE CHANGE TO TRUE IF FIRST TIME RUNNING NOTE ##
+    testing = True ## NOTE CHANGE TO TRUE IF WANT TO FULLY SEARCH FOR ABRS NOTE ##
+    sport_file = "src/utils/sports_list.txt"
+
+    arb_caller(sport_file, regions, markets, limit, first_time, testing)
+    # res = get_sports_list()
     
 if __name__ == '__main__':
     main()
