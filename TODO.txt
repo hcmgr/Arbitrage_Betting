@@ -3,3 +3,4 @@
         - at the moment, if have majority 2-outcome bookies,
           but some 3-outcome bookies, just ignore the 3-outcomes
         - want to use them
+-set up mongodb on the droplet
