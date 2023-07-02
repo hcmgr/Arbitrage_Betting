@@ -184,10 +184,10 @@ def find_sport_arbs(all_games_data, limit=1):
                 print(msgs.arb_to_str(arb, game))
     return None
 
-def find_arbs_all_sports(sport_keys, regions, markets, limit=1, sport_file=None):
+def find_arbs_all_sports(sports_data, regions, markets, limit=1, sport_file=None):
     sport_obj = {"sport_key": None, "regions": regions, "markets": markets}
 
-    for s_key in sport_keys:
+    for s_key, _, _ in sports_data:
         print(msgs.checking_sport(s_key))
         sport_obj["sport_key"] = s_key
         url = reqs.odds_url(sport_obj)
@@ -211,24 +211,23 @@ def test_db(sport_file, first_time):
     sport_keys = get_sports_list(sport_file, not first_time)
     db.insert_sports(sport_keys)
 
-def arb_caller(sport_file, regions="au", markets="h2h", limit=1.0, first_time=False, testing=False):
+def arb_caller(sport_file, regions="au", markets="h2h", limit=1.0, first_time=True, testing=False):
     if testing:
-        sport_keys = ["aussierules_afl", "rugbyleague_nrl"]
+        sports_data = ["aussierules_afl", "rugbyleague_nrl"]
     else:
-        sport_keys = get_sports_list(sport_file, not first_time)
+        sports_data = get_sports_list(sport_file, not first_time)
     
-    find_arbs_all_sports(sport_keys, regions, markets, limit)
+    find_arbs_all_sports(sports_data, regions, markets, limit)
 
 def main():
-    regions = "au,eu,us,us2,uk" ## regions from which bookies operate out of
-    markets = "h2h" ## only searching head-head markets for now
-    limit = 0.98 ## max EV we consider an arb. opportunitity (NOTE: lower == more profitable)
+    regions = "au,eu,us,us2,uk" 
+    markets = "h2h" 
+    limit = 0.98 
     first_time = True ## NOTE CHANGE TO TRUE IF FIRST TIME RUNNING NOTE ##
-    testing = True ## NOTE CHANGE TO TRUE IF WANT TO FULLY SEARCH FOR ABRS NOTE ##
+    testing = False ## NOTE CHANGE TO TRUE IF WANT TO FULLY SEARCH FOR ABRS NOTE ##
     sport_file = "src/utils/sports_list.txt"
 
-    test_db(sport_file, first_time)
-    # arb_caller(sport_file, regions, markets, limit, first_time, testing)
+    arb_caller(sport_file, regions, markets, limit, first_time, testing)
     
 if __name__ == '__main__':
     main()

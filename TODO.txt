@@ -12,3 +12,9 @@
         - those remaining will be false
 
 - can probably abstract idea of an 'arb' into a class
+
+- investigate the following optimisation
+    - there's an end-point 'GET event odds' that allows 
+      you to query one game
+        - can re-query games and update evs for individual 
+          arbs as needed
