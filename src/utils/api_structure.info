@@ -1,5 +1,9 @@
 ## NOTE: below is the JSON structure of a game ##
 
+Some back of envelope math for API costs:
+
+----
+
 """
 Odds json 'game' structure:
     game (a given game ie: data[0], where data == the raw HTTP request data)
