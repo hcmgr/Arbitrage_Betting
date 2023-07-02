@@ -12,7 +12,6 @@ from db import ArbDB
 import messages as msgs
 import odds_requests as reqs
 
-
 def get_sports_list(filename, from_file=False):
     sports_data = []
 

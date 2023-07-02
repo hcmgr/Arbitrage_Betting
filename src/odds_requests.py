@@ -26,7 +26,7 @@ def general_get_req(url):
 def sports_url():
     return HOST + f"/v4/sports/?apiKey={api_key}"
 
-def odds_url(odds_dic: dict[str: str]):
+def odds_url(odds_dic):
     return (HOST +
         f'''/v4/sports/{odds_dic["sport_key"]}/odds/'''
         f'''?apiKey={api_key}'''
