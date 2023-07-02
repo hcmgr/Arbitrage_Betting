@@ -4,9 +4,9 @@ This project is focused on arbitrage betting. Leveraging the Odds API, we analys
 
 ## Installation
 
-NOTE: this is an installation guide for the arb calculator code, not the entire web app
+NOTE: this is an installation guide for the arb calculation code, not the entire web app
 
-1. Clone the repository:
+1. Clone the repository (ensuring to replace YOUR_USERNAME in the link)
     <br>
     ```bash
     git clone https://github.com/{YOUR_USERNAME}/arbitrage-betting.git
