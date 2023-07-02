@@ -7,6 +7,7 @@ Main driver code of project
 import json
 import textwrap
 from itertools import combinations
+from db import ArbDB
 
 import messages as msgs
 import odds_requests as reqs
@@ -222,8 +223,11 @@ def main():
     testing = True ## NOTE CHANGE TO TRUE IF WANT TO FULLY SEARCH FOR ABRS NOTE ##
     sport_file = "src/utils/sports_list.txt"
 
-    arb_caller(sport_file, regions, markets, limit, first_time, testing)
-    # res = get_sports_list()
+    db = ArbDB()
+    
+    # arb_caller(sport_file, regions, markets, limit, first_time, testing)
+    sport_keys = get_sports_list(sport_file, not first_time)
+    db.insert_sports(sport_keys)
     
 if __name__ == '__main__':
     main()

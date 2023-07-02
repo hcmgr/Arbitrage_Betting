@@ -1,10 +1,26 @@
 ## NOTE: below is the JSON structure of a game ##
-
+----
 Some back of envelope math for API costs:
+
+    NOTE: define 'whole run' as:
+        -checking for arbs in each of the 5 markets for each of the app. 40 sports
+
+    -5 markets per request
+    -app. 40 sports
+
+    -so 5*40 = 200 requests per run
+
+    -at 20,000 req/mth allowed, 100 whole runs per month == app. 3 changes per day
+
+    -so, remains to be seen if 3 requests per day is enough
+        -if it is, cool
+
+        -if it isn't, might have to figure out some funky stuff 
+            -ie: figure out which markets are best for us
 
 ----
 
-"""
+----
 Odds json 'game' structure:
     game (a given game ie: data[0], where data == the raw HTTP request data)
 
@@ -33,3 +49,4 @@ Odds json 'game' structure:
                                 home odds
                                 away odds
                 }
+----

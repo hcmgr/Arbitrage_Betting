@@ -2,30 +2,29 @@ from pymongo import MongoClient
 from dotenv import load_dotenv
 import os
 
-def get_db_config():
-    load_dotenv('.env')
-    name = os.getenv("dbName")
-    port = int(os.getenv("dbPort"))
-    addr = os.getenv("dbAddr")
-    return {"name": name, 
-            "port": port, 
-            "addr": addr, 
-            }
+class ArbDB:
+    def __init__(self):
+        load_dotenv('.env')
+        self.name = os.getenv("dbName")
+        self.port = int(os.getenv("dbPort"))
+        self.addr = os.getenv("dbAddr")
+        self.collections = {"main":"arbs", "sports":"sport_keys"}
     
-def init_db_conn():
-    db_info = get_db_config()
-    client = MongoClient(db_info["addr"], db_info["port"])
-    db = client[db_info["name"]]
-    return db, client
+    def insert_arb(self, arb):
+        client = self.get_client()
+        db = client[self.name]
+        arb_coll = db[self.collections["main"]]
+        arb_coll.insert_one(arb)
+        client.close()
+    
+    def insert_sports(self, sport_keys):
+        client = self.get_client()
+        db = client[self.name]
+        sports_coll = db[self.collections["sports"]]
+        for sk in sport_keys:
+            sports_coll.insert_one({"key": sk})
+        client.close()
 
-def main():
-    db, client = init_db_conn()
-    main_coll = db["arbs"]
+    def get_client(self):
+        return MongoClient(self.addr, self.port)
 
-    sample_data = {"ev": 5, "home": "gimble", "away": "brimble"}
-    main_coll.insert_one(sample_data)
-
-    client.close()
-
-if __name__ == '__main__':
-    main()
