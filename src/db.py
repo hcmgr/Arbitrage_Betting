@@ -17,12 +17,13 @@ class ArbDB:
         arb_coll.insert_one(arb)
         client.close()
     
-    def insert_sports(self, sport_keys):
+    def insert_sports(self, sports_data):
         client = self.get_client()
         db = client[self.name]
         sports_coll = db[self.collections["sports"]]
-        for sk in sport_keys:
-            sports_coll.insert_one({"key": sk})
+        for sport_key, title, desc in sports_data:
+            doc = {"_id": sport_key, "title":title, "desc":desc}
+            sports_coll.insert_one(doc)
         client.close()
 
     def get_client(self):

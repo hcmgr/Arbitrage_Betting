@@ -14,7 +14,7 @@ import odds_requests as reqs
 
 
 def get_sports_list(filename, from_file=False):
-    sport_keys = []
+    sports_data = []
 
     if from_file: ## retreive from file
         with open(filename, "r") as file:
@@ -22,15 +22,15 @@ def get_sports_list(filename, from_file=False):
                 if line.startswith("## "): ## commented out sport
                     continue
                 line = line.strip()  
-                sport_keys.append(line)
+                sports_data.append(line)
 
     else: ## retreive from API, write to sports to file
         url = reqs.sports_url()
         data = reqs.general_get_req(url)
-        f = lambda x: x["key"]
-        sport_keys = list(map(f, data))
-        write_sports_to_file(filename, sport_keys)
-    return sport_keys
+        f = lambda x: (x["key"], x["title"], x["description"])
+        sports_data = list(map(f, data))
+        write_sports_to_file(filename, sports_data)
+    return sports_data
 
 """
 Write all possible sports to a file 'sports_list'
@@ -207,6 +207,11 @@ def test_upcoming(regions, markets):
     print(data)
     return None
 
+def test_db(sport_file, first_time):
+    db = ArbDB()
+    sport_keys = get_sports_list(sport_file, not first_time)
+    db.insert_sports(sport_keys)
+
 def arb_caller(sport_file, regions="au", markets="h2h", limit=1.0, first_time=False, testing=False):
     if testing:
         sport_keys = ["aussierules_afl", "rugbyleague_nrl"]
@@ -219,15 +224,12 @@ def main():
     regions = "au,eu,us,us2,uk" ## regions from which bookies operate out of
     markets = "h2h" ## only searching head-head markets for now
     limit = 0.98 ## max EV we consider an arb. opportunitity (NOTE: lower == more profitable)
-    first_time = False ## NOTE CHANGE TO TRUE IF FIRST TIME RUNNING NOTE ##
+    first_time = True ## NOTE CHANGE TO TRUE IF FIRST TIME RUNNING NOTE ##
     testing = True ## NOTE CHANGE TO TRUE IF WANT TO FULLY SEARCH FOR ABRS NOTE ##
     sport_file = "src/utils/sports_list.txt"
 
-    db = ArbDB()
-    
+    test_db(sport_file, first_time)
     # arb_caller(sport_file, regions, markets, limit, first_time, testing)
-    sport_keys = get_sports_list(sport_file, not first_time)
-    db.insert_sports(sport_keys)
     
 if __name__ == '__main__':
     main()
