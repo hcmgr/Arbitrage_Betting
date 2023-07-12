@@ -6,7 +6,7 @@ function App() {
   return (
     React.createElement('div', null,
       React.createElement('h1', null, 'Hello, React!'),
-      React.createElement('p', null, 'This is a minimal React app.')
+      React.createElement('p', null, 'This is a retarded minimal React app.')
     )
   );
 }
