@@ -4,3 +4,6 @@ sports_list.txt
 __pycache__
 run.txt
 node_modules
+.vscode
+src/node_modules
+src/.flaskenv
