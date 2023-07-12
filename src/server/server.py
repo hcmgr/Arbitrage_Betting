@@ -14,6 +14,3 @@ def bundle():
 @app.route('/bix')
 def bix():
     return 'bix'
-
-if __name__ == '__main__':
-    app.run(debug=True)
