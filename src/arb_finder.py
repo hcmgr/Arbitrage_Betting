@@ -199,13 +199,6 @@ def find_arbs_all_sports(sports_data, regions, markets, limit=1, sport_file=None
         find_sport_arbs(data, limit=limit)
     return None
 
-def test_upcoming(regions, markets):
-    sport_obj = {"sport_key": "upcoming", "regions": regions, "markets": markets}
-    url = reqs.attempt_url(sport_obj)
-    data = reqs.general_get_req(url)
-    print(data)
-    return None
-
 def test_db(sport_file, first_time):
     db = ArbDB()
     sport_keys = get_sports_list(sport_file, not first_time)
@@ -220,9 +213,10 @@ def arb_caller(sport_file, regions="au", markets="h2h", limit=1.0, first_time=Tr
     find_arbs_all_sports(sports_data, regions, markets, limit)
 
 def main():
-    regions = "au,eu,us,us2,uk" 
+    # regions = "au,eu,us,us2,uk" 
+    regions = "au"
     markets = "h2h" 
-    limit = 0.98 
+    limit = 1.0
     first_time = True ## NOTE CHANGE TO TRUE IF FIRST TIME RUNNING NOTE ##
     testing = False ## NOTE CHANGE TO TRUE IF WANT TO FULLY SEARCH FOR ABRS NOTE ##
     sport_file = "src/utils/sports_list.txt"

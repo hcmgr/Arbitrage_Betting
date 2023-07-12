@@ -1,5 +1,6 @@
-- set up rsync to droplet
-
+- investigate if 0.35's are actually 0.35's
+    -currency shit?
+    
 - partition bookies into 2-outcome and 3-outcome bookies
     - for instance:
         - at the moment, if have majority 2-outcome bookies,
