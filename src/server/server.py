@@ -1,10 +1,10 @@
 from flask import Flask, render_template
 
-app = Flask(__name__)
+app = Flask(__name__, template_folder="../client/templates")
 
 @app.route('/')
 def index():
     return render_template('public/index.html')
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(host='127.0.0.1', port=8000, debug=True)
