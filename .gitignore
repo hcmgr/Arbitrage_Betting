@@ -3,3 +3,4 @@ venv
 sports_list.txt
 __pycache__
 run.txt
+node_modules
