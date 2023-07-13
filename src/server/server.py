@@ -9,7 +9,7 @@ def index():
 
 @app.route('/static/bundle.js')
 def bundle():
-    return send_from_directory('dist', 'bundle.js')
+    return send_from_directory('bundles', 'bundle.js')
 
 @app.route('/bix')
 def bix():
