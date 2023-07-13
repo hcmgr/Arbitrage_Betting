@@ -1,20 +1,29 @@
 # Arbitrage Betting Project
 
-This project is focused on arbitrage betting. Leveraging the Odds API, we analyse and compare odds across bookmakers to identify potential arbibtrage opportunities. The end goal is to display these opporunities and allow bettors to calculate their yields in a React App.
+### Background
+
+[Arbitrage](https://en.wikipedia.org/wiki/Arbitrage_betting) opportunities allow one to make a guaranteed profit by betting both sides of a sports event. Because bookmakers aren't stupid, they always ensure no such opporunities arise from their own odds. However, they do not ensure this ACROSS bookmakers. For example, betting for and against Nadal at the same bookmaker always loses you money. However, betting for Nadal at SportsBet and against him at Pointsbet (ie: cross-betting), is occasionally profitable. By scowering these 'cross-bets', we can easily find arbitrage opportunities.
+
+
+### Approach
+We've built a React app to display all current arbitrate opporunities across 40 different sports in 5 global markets. 
+
+### Stack
+Front-end: React, Boostrap
+Back-end: Flask web server, MongoDB database, hosted on personal Ubuntu droplet
 
 ## Installation
-
-NOTE: this is an installation guide for the arb calculation code, not the entire web app
 
 1. Clone the repository (ensuring to replace YOUR_USERNAME in the link)
     <br>
     ```bash
-    git clone https://github.com/{YOUR_USERNAME}/arbitrage-betting.git
+    https://github.com/{YOUR_USERNAME}/Arbitrage_Betting.git
     ```
 
 2. Initialise your virtual environment
     <br>
     ```bash
+    cd Arbitrage_Betting
     python3 -v venv venv
     source ./venv/bin/activate
     ```
@@ -33,13 +42,33 @@ NOTE: this is an installation guide for the arb calculation code, not the entire
     ODDS_API_KEY={YOUR_API_KEY}
     ```
 
-5. Run: 
-    <br>
+5. If you simply want to run and test the arb. calculation code, run:
     ```bash
     python3 src/arb_finder.py
     ```
     And watch the magic
 
+##### Instructions for running the website [For contributors and general interest]
+If you want to actually host the full React app:
 
-  
+5. Ensure you have node.js installed
+6. Run:
+    ```bash
+    npm init -y
+    npm install
+    ```
+to install the necessary node modules
 
+7. Ensure config/webpack.config.js has:
+    ```bash
+    bind = "127.0.0.1:5000"
+    ```
+
+7. Run:
+    ```bash
+    chmod run.sh 777
+    ./run.sh
+    ```
+this will start a Flask web server on localhost 5000 
+
+NOTE: to host remotely, simply change bind to appropriate IP address and port config
