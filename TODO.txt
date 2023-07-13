@@ -1,24 +1,24 @@
-- investigate if 0.35's are actually 0.35's
-    -currency shit?
+Web server stuff:
 
-- make run.py/run.sh scripts that compile and start up server
-- detail hosting instructions in README
-    
-- partition bookies into 2-outcome and 3-outcome bookies
-    - for instance:
-        - at the moment, if have majority 2-outcome bookies,
-          but some 3-outcome bookies, just ignore the 3-outcomes
-        - want to use them
+Actual arb calc. stuff:
+    - investigate if 0.35's are actually 0.35's
+        -currency shit?
 
-- every time do a sports search:
-    - set all current sports to false
-    - go through each sport and set to true in db
-        - those remaining will be false
+    - partition bookies into 2-outcome and 3-outcome bookies
+        - for instance:
+            - at the moment, if have majority 2-outcome bookies,
+            but some 3-outcome bookies, just ignore the 3-outcomes
+            - want to use them
 
-- can probably abstract idea of an 'arb' into a class
+    - every time do a sports search:
+        - set all current sports to false
+        - go through each sport and set to true in db
+            - those remaining will be false
 
-- investigate the following optimisation
-    - there's an end-point 'GET event odds' that allows 
-      you to query one game
-        - can re-query games and update evs for individual 
-          arbs as needed
+    - can probably abstract idea of an 'arb' into a class
+
+    - investigate the following optimisation
+        - there's an end-point 'GET event odds' that allows 
+        you to query one game
+            - can re-query games and update evs for individual 
+            arbs as needed

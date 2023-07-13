@@ -5,7 +5,7 @@ import Table from './table'
 function App() {
     return (
         <div className="App">
-            <p> Tester React app</p>
+            <p> Tester React app because yes and now oh fuck me</p>
             <Table />
         </div>
     );
