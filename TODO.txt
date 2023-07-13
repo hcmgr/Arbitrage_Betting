@@ -1,5 +1,8 @@
 - investigate if 0.35's are actually 0.35's
     -currency shit?
+
+- make run.py/run.sh scripts that compile and start up server
+- detail hosting instructions in README
     
 - partition bookies into 2-outcome and 3-outcome bookies
     - for instance:
