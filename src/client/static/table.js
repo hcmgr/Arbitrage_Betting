@@ -19,29 +19,30 @@ function TableHead() {
 
 // Table rows component
 function TableRows({ data }) {
-  return (
-    <tbody>
-      {data.map((item, index) => (
-        <tr key={index}>
-          <td>{item.profit}%</td>
-          <td>{item.sport}</td>
-          <td>{item.game}</td>
-          <td>${item.o1}</td>
-          <td>${item.o2}</td>
-          <td>${item.o3}</td>
-          <td>{item.region}</td>
-        </tr>
-      ))}
-    </tbody>
-  );
-}
+    console.log(data)
+    return (
+      <tbody>
+        {data.map((item, index) => (
+          <tr key={index}>
+            <td>{item.profit}%</td>
+            <td>{item.sport}</td>
+            <td>{item.game}</td>
+            <td>${item.o1}</td>
+            <td>${item.o2}</td>
+            <td>{item.o3 !== null ? `$${item.o3}` : 'N/A'}</td>
+            <td>{item.region}</td>
+          </tr>
+        ))}
+      </tbody>
+    );
+  }
 
 // Main Table component
 function Table({ tableData }) {
   return (
     <div className="container">
       <h1>CRUD App</h1>
-      <table className="table table-striped">
+      <table className="table-striped">
         <TableHead />
         <TableRows data={tableData} />
       </table>

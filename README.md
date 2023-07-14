@@ -44,9 +44,15 @@ Back-end: Flask web server, MongoDB database, hosted on personal Ubuntu droplet
 
 5. If you simply want to run and test the arb. calculation code, run:
     ```bash
-    python3 src/arb_finder.py
+    chmod 777 scripts/arb_find.sh 
+    ./scripts/arb_find.sh
     ```
     And watch the magic
+
+    <br>
+
+    NOTE: may have to go into src/server/arb_finder.py and uncomment out
+          arb_caller() in the main function
 
 ### Instructions for running the website [For contributors and general interest]
 If you want to actually host the full React app:
@@ -67,7 +73,7 @@ to install the necessary node modules
 7. Run:
     ```bash
     chmod run.sh 777
-    ./run.sh
+    ./scripts/run.sh
     ```
 this will start a Flask web server on localhost 5000 
 
