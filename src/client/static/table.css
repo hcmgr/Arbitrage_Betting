@@ -1,27 +1,24 @@
-.container {
+.table {
     width: 50%;
-    overflow-x: auto;
-  }
-  
-  .table-striped {
-    width: 100%;
     border-collapse: collapse;
   }
   
-  .table-striped th,
-  .table-striped td {
-    padding: 10px;
+  .table th,
+  .table td {
+    padding: 30px; /* Adjust the padding value as needed */
     text-align: center;
+    vertical-align: middle;
   }
   
-  .table-striped th {
+  .table th {
     background-color: #f2f2f2;
   }
   
-  .table-striped td div {
-    margin-bottom: 5px;
-    border: none; /* Removed the border property */
+  .table-striped tbody tr:nth-of-type(odd) {
+    background-color: #f8f9fa;
   }
   
-  
+  .table td > div {
+    margin-bottom: 100px; /* Adjust the margin value as needed */
+  }
   

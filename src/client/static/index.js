@@ -2,7 +2,7 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
 import axios from 'axios';
-import 'bootstrap/dist/css/bootstrap.min.css'; // all sub-components of App can use this
+// import 'bootstrap/dist/css/bootstrap.min.css'; // all sub-components of App can use this
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 

@@ -7,3 +7,4 @@ node_modules
 .vscode
 src/node_modules
 src/.flaskenv
+bundles
