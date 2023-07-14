@@ -17,6 +17,21 @@ function TableHead() {
   );
 }
 
+function OutcomeCell(outcome) {
+    if (!outcome) {
+        return (
+            <td></td>
+        )
+    } 
+    return (
+        <td>
+            <div>${outcome.price}</div>
+            <div>{outcome.book}</div>
+            <div>{outcome.team}</div>
+        </td>
+    )
+}
+
 // Table rows component
 function TableRows({ data }) {
     console.log(data)
@@ -27,9 +42,9 @@ function TableRows({ data }) {
             <td>{item.profit}%</td>
             <td>{item.sport}</td>
             <td>{item.game}</td>
-            <td>${item.o1}</td>
-            <td>${item.o2}</td>
-            <td>{item.o3 !== null ? `$${item.o3}` : 'N/A'}</td>
+            <td>{OutcomeCell(item.o1)}</td>
+            <td>{OutcomeCell(item.o2)}</td>
+            <td>{OutcomeCell(item.o3)}</td>
             <td>{item.region}</td>
           </tr>
         ))}

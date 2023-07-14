@@ -245,9 +245,44 @@ def test_yield():
 
 def test_sample_arb():
     data = [
-    {'profit': 9.00, 'sport': 'NCAA', 'game': 'Kentuck v UConn', 'o1': 1.84, 'o2': 2.18, 'o3': None, 'region': 'au'},
-    {'profit': 7.92, 'sport': 'NFL', 'game': 'Packers v Bears', 'o1': 2.15, 'o2': 3.09, 'o3': 1.58, 'region': 'us'},
-    {'profit': 3.25, 'sport': 'NBA', 'game': 'Lakers v Nets', 'o1': 1.67, 'o2': 2.01, 'o3': None, 'region': 'us'}
+        {
+            "profit": 9.00,
+            "sport": "NCAA",
+            "game": "Duke v UNC",
+            "o1": {
+                "price": 1.84,
+                "team": "Duke",
+                "book": "Betway"
+            },
+            "o2": {
+                "price": 2.18,
+                "team": "UNC",
+                "book": "William Hill"
+            },
+            "o3": None,
+            "region": "au"
+        },
+        {
+            "profit": 7.50,
+            "sport": "NBA",
+            "game": "Lakers v Nets",
+            "o1": {
+                "price": 1.95,
+                "team": "Lakers",
+                "book": "Bet365"
+            },
+            "o2": {
+                "price": 2.45,
+                "team": "Nets",
+                "book": "Bwin"
+            },
+            "o3": {
+                "price": 3.4,
+                "team": "Draw",
+                "book": "PointsBet"
+            },
+            "region": "us"
+        }
     ]
     return data
 
