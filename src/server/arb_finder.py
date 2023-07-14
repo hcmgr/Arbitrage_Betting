@@ -3,7 +3,6 @@
 """
 Main driver code of project
 """
-
 import json
 import textwrap
 from itertools import combinations
@@ -11,6 +10,7 @@ from db import ArbDB
 
 import messages as msgs
 import odds_requests as reqs
+import calculations as calcs
 
 def get_sports_list(filename, from_file=False):
     sports_data = []
@@ -42,83 +42,7 @@ def write_sports_to_file(filename, sport_keys):
         f.write(str(sport) + '\n')
     f.close()
 
-"""
-Returns the sum of reciprocals of the given outcomes
-NOTE: used to calculate expected value of n-many outcomes
-    eg: if 1/o1 + 1/o2 < 1, arbitrage opportunity
-"""
-def get_EV(*outcome_odds):
-    total = 0
-    for o in outcome_odds:
-        total += (1/o)
-    return total
 
-"""
-Given a total one is willing to spend,
-calculate the amount one should stake on each outcome
-"""
-def calc_yield(total, *outcome_odds):
-    n = len(outcome_odds)
-    if n == 2:
-        o1, o2 = outcome_odds
-        s1 = total / (1 + o1/o2)
-        s2 = total - s1
-        return s1, s2
-    elif n == 3:
-        o1, o2, o3 = outcome_odds
-        s1 = total / (1 + (o1/o2) + (o1/o3))
-        s2 = total / (1 + (o2/o1) + (o2/o3))
-        s3 = total / (1 + (o3/o1) + (o3/o2))
-        return s1,s2,s3
-    else:
-        print(msgs.not_2_3_outcome_err())
-        return None
-
-"""
-Returns all pairs (2-tuples) of outcomes
-"""
-def get_outcome_pairs(o1s, o2s):
-    pairs = []
-    n = 2
-    if len(o1s) != n or len(o2s) != n:
-        return None
-    for i in range(n):
-        for j in range(n):
-            if i != j:
-                pairs.append((o1s[i], o2s[j]))
-    return pairs
-
-"""
-Returns all triples (3-tuples) of outcomes
-"""
-def get_outcome_trips(o1s, o2s, o3s):
-    trips = []
-    n = 3
-    if len(o1s) != n or len(o2s) != n or len(o3s) != n:
-        return None
-
-    for i in range(n):
-        for j in range(n):
-            for k in range(n):
-                if i != j and j != k and i != k:
-                    trips.append((o1s[i], o2s[j], o3s[k]))
-    return trips
-
-def get_outcome_combos(outcomes, n):
-    ## check all same number of outcomes
-    if any(len(outcome) != n for outcome in outcomes):
-        return None
-    if n == 2:
-        return get_outcome_pairs(*outcomes)
-    elif n == 3:
-        return get_outcome_trips(*outcomes)
-    else:
-        print(msgs.not_2_3_outcome_err())
-    return None
-
-def get_n_tuple_combos(length, n):
-    els = [i for i in range(length)]
-    return list(combinations(els, n))
 
 """
 Returns an 'arb', which is a dictionary holding the expected
@@ -140,14 +64,14 @@ def check_bookie_valid(bookie):
 def get_outcome_arbs(bookies, commence_time, limit=1, min_outs=3):
     outcomes = [b["markets"][0]["outcomes"] for b in bookies]
     bookie_keys = [b["key"] for b in bookies]
-    outcome_combos = get_outcome_combos(outcomes, len(outcomes))
+    outcome_combos = calcs.get_outcome_combos(outcomes, len(outcomes))
     if not outcome_combos:
         return []
 
     arbs = []
     for combo in outcome_combos:
         prices = [o["price"] for o in combo]
-        ev = get_EV(*prices)
+        ev = calcs.get_EV(*prices)
         if ev < limit:
             arbs.append(build_arb(ev, commence_time, zip(bookie_keys, combo), min_outs))
     return arbs
@@ -189,7 +113,7 @@ def find_game_arbs(game, limit=1):
     n = len(bookmakers)
 
     num_outcomes = find_num_outcomes(bookmakers)
-    ind_combos = get_n_tuple_combos(n, num_outcomes)
+    ind_combos = calcs.get_all_index_combos(n, num_outcomes)
     
     for inds in ind_combos:
         bookies = [bookmakers[x] for x in inds]
@@ -222,75 +146,6 @@ def find_arbs_all_sports(sports_data, regions, markets, limit=1, sport_file=None
         find_sport_arbs(data, limit=limit)
     return None
 
-def test_db(sport_file, first_time):
-    db = ArbDB()
-    sport_keys = get_sports_list(sport_file, not first_time)
-    db.insert_sports(sport_keys)
-
-def test_yield():
-    prices = [3.05, 3.3, 2.82]
-    total = 10000
-    ev = get_EV(*prices)
-    if len(prices) == 2:
-        s1, s2 = calc_yield(total, *prices)
-    if len(prices) == 3:
-        s1, s2, s3 = calc_yield(total, *prices)
-    total_ret = s1 * prices[0]
-    total_prof = total_ret - total
-    prof_perc = total_prof / total * 100
-    
-    print(f"EV: {ev}")
-    print(f"Willing to spend: {total}")
-    print(f"Stake1: ${s1}, Stake2: ${s2}, Stake3: ${s3}")
-    print(f"Total returned: {s1 * prices[0]}")
-    print(f"Profit: ${total_prof} ({prof_perc}%)")
-
-def test_sample_arb():
-    data = [
-        {
-            "profit": 9.00,
-            "sport": "NCAA",
-            "game": "Duke v UNC",
-            "outcomes": [
-            {
-                "price": 1.84,
-                "team": "Duke",
-                "book": "Betway"
-            },
-            {
-                "price": 2.18,
-                "team": "UNC",
-                "book": "William Hill"
-            },
-            None
-        ],
-        "region": "au"
-        },
-        {
-            "profit": 7.50,
-            "sport": "NBA",
-            "game": "Lakers v Clippers",
-            "outcomes": [
-            {
-                "price": 2.05,
-                "team": "Lakers",
-                "book": "Bet365"
-            },
-            {
-                "price": 2.35,
-                "team": "Clippers",
-                "book": "Bwin"
-            },
-            {
-                "price": 4.1,
-                "team": "Draw",
-                "book": "Bwin"
-            }
-        ],
-        "region": "us"
-    }]
-    return data
-
 def arb_caller(sport_file, regions="au", markets="h2h", limit=1.0, first_time=True, testing=False):
     if testing:
         sports_data = ["aussierules_afl", "rugbyleague_nrl"]
@@ -309,7 +164,6 @@ def main():
     sport_file = "src/server/utils/sports_list.txt"
 
     arb_caller(sport_file, regions, markets, limit, first_time, testing)
-    # test_sample_arb()
     
 if __name__ == '__main__':
     main()
