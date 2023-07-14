@@ -47,11 +47,32 @@ Returns the sum of reciprocals of the given outcomes
 NOTE: used to calculate expected value of n-many outcomes
     eg: if 1/o1 + 1/o2 < 1, arbitrage opportunity
 """
-def get_EV(*outcomes):
+def get_EV(*outcome_odds):
     total = 0
-    for o in outcomes:
+    for o in outcome_odds:
         total += (1/o)
     return total
+
+"""
+Given a total one is willing to spend,
+calculate the amount one should stake on each outcome
+"""
+def calc_yield(total, *outcome_odds):
+    n = len(outcome_odds)
+    if n == 2:
+        o1, o2 = outcome_odds
+        s1 = total / (1 + o1/o2)
+        s2 = total - s1
+        return s1, s2
+    elif n == 3:
+        o1, o2, o3 = outcome_odds
+        s1 = total / (1 + (o1/o2) + (o1/o3))
+        s2 = total / (1 + (o2/o1) + (o2/o3))
+        s3 = total / (1 + (o3/o1) + (o3/o2))
+        return s1,s2,s3
+    else:
+        print(msgs.not_2_3_outcome_err())
+        return None
 
 """
 Returns all pairs (2-tuples) of outcomes
@@ -87,12 +108,12 @@ def get_outcome_combos(outcomes, n):
     ## check all same number of outcomes
     if any(len(outcome) != n for outcome in outcomes):
         return None
-
     if n == 2:
         return get_outcome_pairs(*outcomes)
-    if n == 3:
+    elif n == 3:
         return get_outcome_trips(*outcomes)
-
+    else:
+        print(msgs.not_2_3_outcome_err())
     return None
 
 def get_n_tuple_combos(length, n):
@@ -204,6 +225,27 @@ def test_db(sport_file, first_time):
     sport_keys = get_sports_list(sport_file, not first_time)
     db.insert_sports(sport_keys)
 
+def test_sample_arb():
+    prices = [3.05, 3.3, 2.82]
+    total = 10000
+    ev = get_EV(*prices)
+    if len(prices) == 2:
+        s1, s2 = calc_yield(total, *prices)
+    if len(prices) == 3:
+        s1, s2, s3 = calc_yield(total, *prices)
+    total_ret = s1 * prices[0]
+    total_prof = total_ret - total
+    prof_perc = total_prof / total * 100
+    
+    print(f"EV: {ev}")
+    print(f"Willing to spend: {total}")
+    print(f"Stake1: ${s1}, Stake2: ${s2}, Stake3: ${s3}")
+    print(f"Total returned: {s1 * prices[0]}")
+    print(f"Profit: ${total_prof} ({prof_perc}%)")
+
+def test_yield_calculator(arb):
+    pass
+
 def arb_caller(sport_file, regions="au", markets="h2h", limit=1.0, first_time=True, testing=False):
     if testing:
         sports_data = ["aussierules_afl", "rugbyleague_nrl"]
@@ -218,10 +260,11 @@ def main():
     markets = "h2h" 
     limit = 1.0
     first_time = True ## NOTE CHANGE TO TRUE IF FIRST TIME RUNNING NOTE ##
-    testing = False ## NOTE CHANGE TO TRUE IF WANT TO FULLY SEARCH FOR ABRS NOTE ##
-    sport_file = "src/utils/sports_list.txt"
+    testing = False ## NOTE CHANGE TO FALSE IF WANT TO FULLY SEARCH FOR ABRS NOTE ##
+    sport_file = "src/server/utils/sports_list.txt"
 
-    arb_caller(sport_file, regions, markets, limit, first_time, testing)
+    # arb_caller(sport_file, regions, markets, limit, first_time, testing)
+    test_sample_arb()
     
 if __name__ == '__main__':
     main()

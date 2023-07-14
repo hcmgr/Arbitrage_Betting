@@ -1,4 +1,5 @@
-from flask import Flask, render_template, send_from_directory
+from flask import Flask, render_template, send_from_directory, jsonify
+import arb_finder
 
 app = Flask(__name__, template_folder="../client/templates")
 
@@ -11,9 +12,10 @@ def index():
 def bundle():
     return send_from_directory('bundles', 'bundle.js')
 
-@app.route('/bix')
+@app.route('/odds')
 def bix():
-    return 'bix'
+    data = arb_finder.test_sample_arb()
+    return data
 
 if __name__ == '__main__':
     app.run()

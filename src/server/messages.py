@@ -24,7 +24,7 @@ def arb_to_str(arb, game):
     msg = (
         f"""{game_to_str(game)}\n\n"""
         f"""{arb}"""
-        f"""---------\n"""
+        f"""\n"""
     )
     return msg
 
@@ -47,4 +47,8 @@ def no_market_offered_err(game, bookmaker):
         f"""offers no markets for the following game: \n"""
         f"""{game_to_str(game)}"""
     )
+    return msg
+
+def not_2_3_outcome_err():
+    msg = "Only handle 2 or 3 outcomes games"
     return msg

@@ -74,5 +74,8 @@ this will start a Flask web server on localhost 5000
 NOTE: to host remotely, simply change bind to appropriate IP address and port config
 
 ### Other helpful things ###
+Sync local repo to remote repo using rsync:
 
-rsync -avz --exclude=/venv --exclude=/node_modules  {path_to_local_repo} {user_account}@{remote_IP}:{path_one_remote_repo}
+```bash
+rsync -avz --exclude=/venv --exclude=/node_modules  {path_to_local_repo} {user}@{remote_IP}:{path_to_remote_repo}
+```

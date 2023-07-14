@@ -12,10 +12,13 @@ function Table() {
       <table className="table table-striped">
         <thead>
           <tr>
-            <th>ID</th>
-            <th>Name</th>
-            <th>Age</th>
-            <th>Email</th>
+            <th>Profit</th>
+            <th>League/Sport</th>
+            <th>Game</th>
+            <th>Outcome 1</th>
+            <th>Outcome 2</th>
+            <th>Outcome 3 (optional)</th>
+            <th>Region</th>
           </tr>
         </thead>
         <tbody>
