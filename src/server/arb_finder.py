@@ -124,10 +124,11 @@ def get_n_tuple_combos(length, n):
 Returns an 'arb', which is a dictionary holding the expected
 value and bookie data of a given arbitrage opportunity
 """
-def build_arb(ev, commence_time, bookie_bet_combos):
-    arb = {"ev": ev, "commence_time": commence_time}
-    for bookie, bet in bookie_bet_combos:
-        arb[bookie["key"]] = {"team": bet["name"], "price": bet["price"]}
+def build_arb(ev, commence_time, bookie_bet_combos, min_outs):
+    arb = {"profit": 0, "sport": "binky", "game": "thingo", "outcomes": [None] * min_outs}
+    for i, (bookie_key, bet) in enumerate(bookie_bet_combos):
+        arb_summary = {"team": bet["name"], "price": bet["price"], "book": bookie_key}
+        arb["outcomes"][i] = arb_summary
     return arb
 
 def check_bookie_valid(bookie):
@@ -136,8 +137,9 @@ def check_bookie_valid(bookie):
             len(markets) != 0 and
             markets[0]["outcomes"] != None)
 
-def get_outcome_arbs(bookies, commence_time, limit=1):
+def get_outcome_arbs(bookies, commence_time, limit=1, min_outs=3):
     outcomes = [b["markets"][0]["outcomes"] for b in bookies]
+    bookie_keys = [b["key"] for b in bookies]
     outcome_combos = get_outcome_combos(outcomes, len(outcomes))
     if not outcome_combos:
         return []
@@ -147,7 +149,7 @@ def get_outcome_arbs(bookies, commence_time, limit=1):
         prices = [o["price"] for o in combo]
         ev = get_EV(*prices)
         if ev < limit:
-            arbs.append(build_arb(ev, commence_time, zip(bookies, combo)))
+            arbs.append(build_arb(ev, commence_time, zip(bookie_keys, combo), min_outs))
     return arbs
 
 """
@@ -249,41 +251,44 @@ def test_sample_arb():
             "profit": 9.00,
             "sport": "NCAA",
             "game": "Duke v UNC",
-            "o1": {
+            "outcomes": [
+            {
                 "price": 1.84,
                 "team": "Duke",
                 "book": "Betway"
             },
-            "o2": {
+            {
                 "price": 2.18,
                 "team": "UNC",
                 "book": "William Hill"
             },
-            "o3": None,
-            "region": "au"
+            None
+        ],
+        "region": "au"
         },
         {
             "profit": 7.50,
             "sport": "NBA",
-            "game": "Lakers v Nets",
-            "o1": {
-                "price": 1.95,
+            "game": "Lakers v Clippers",
+            "outcomes": [
+            {
+                "price": 2.05,
                 "team": "Lakers",
                 "book": "Bet365"
             },
-            "o2": {
-                "price": 2.45,
-                "team": "Nets",
+            {
+                "price": 2.35,
+                "team": "Clippers",
                 "book": "Bwin"
             },
-            "o3": {
-                "price": 3.4,
+            {
+                "price": 4.1,
                 "team": "Draw",
-                "book": "PointsBet"
-            },
-            "region": "us"
-        }
-    ]
+                "book": "Bwin"
+            }
+        ],
+        "region": "us"
+    }]
     return data
 
 def arb_caller(sport_file, regions="au", markets="h2h", limit=1.0, first_time=True, testing=False):
@@ -303,8 +308,8 @@ def main():
     testing = False ## NOTE CHANGE TO FALSE IF WANT TO FULLY SEARCH FOR ABRS NOTE ##
     sport_file = "src/server/utils/sports_list.txt"
 
-    # arb_caller(sport_file, regions, markets, limit, first_time, testing)
-    test_sample_arb()
+    arb_caller(sport_file, regions, markets, limit, first_time, testing)
+    # test_sample_arb()
     
 if __name__ == '__main__':
     main()

@@ -1,6 +1,8 @@
 import React from 'react';
 
 // Table head component
+// TODO: table creates maximum needed outcome columns
+// (Don't just hard code for 3 outcomes)
 function TableHead() {
   return (
     <thead>
@@ -20,7 +22,7 @@ function TableHead() {
 function OutcomeCell(outcome) {
     if (!outcome) {
         return (
-            <td></td>
+            <td>-</td>
         )
     } 
     return (
@@ -34,7 +36,6 @@ function OutcomeCell(outcome) {
 
 // Table rows component
 function TableRows({ data }) {
-    console.log(data)
     return (
       <tbody>
         {data.map((item, index) => (
@@ -42,9 +43,9 @@ function TableRows({ data }) {
             <td>{item.profit}%</td>
             <td>{item.sport}</td>
             <td>{item.game}</td>
-            <td>{OutcomeCell(item.o1)}</td>
-            <td>{OutcomeCell(item.o2)}</td>
-            <td>{OutcomeCell(item.o3)}</td>
+            {item.outcomes.map((outcome, _) => (
+            <td>{OutcomeCell(outcome)}</td>
+            ))}
             <td>{item.region}</td>
           </tr>
         ))}
