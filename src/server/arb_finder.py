@@ -225,7 +225,7 @@ def test_db(sport_file, first_time):
     sport_keys = get_sports_list(sport_file, not first_time)
     db.insert_sports(sport_keys)
 
-def test_sample_arb():
+def test_yield():
     prices = [3.05, 3.3, 2.82]
     total = 10000
     ev = get_EV(*prices)
@@ -243,8 +243,13 @@ def test_sample_arb():
     print(f"Total returned: {s1 * prices[0]}")
     print(f"Profit: ${total_prof} ({prof_perc}%)")
 
-def test_yield_calculator(arb):
-    pass
+def test_sample_arb():
+    data = [
+    {'profit': 9.00, 'sport': 'NCAA', 'game': 'Kentuck v UConn', 'o1': 1.84, 'o2': 2.18, 'region': 'au'},
+    {'profit': 7.92, 'sport': 'NFL', 'game': 'Packers v Bears', 'o1': 2.15, 'o2': 3.09, 'region': 'us'},
+    {'profit': 3.25, 'sport': 'NBA', 'game': 'Lakers v Nets', 'o1': 1.67, 'o2': 2.01, 'region': 'us'}
+    ]
+    return data
 
 def arb_caller(sport_file, regions="au", markets="h2h", limit=1.0, first_time=True, testing=False):
     if testing:

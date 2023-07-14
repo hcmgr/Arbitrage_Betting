@@ -1,36 +1,49 @@
 import React from 'react';
 
-function Table() {
-  const tableData = [
-    { id: 1, name: 'John', age: 25, email: 'john@example.com' },
-    { id: 2, name: 'Alice', age: 32, email: 'alice@example.com' },
-  ];
+// Table head component
+function TableHead() {
+  return (
+    <thead>
+      <tr>
+        <th>Profit</th>
+        <th>League/Sport</th>
+        <th>Game</th>
+        <th>Outcome 1</th>
+        <th>Outcome 2</th>
+        <th>Outcome 3</th>
+        <th>Region</th>
+      </tr>
+    </thead>
+  );
+}
 
+// Table rows component
+function TableRows({ data }) {
+  return (
+    <tbody>
+      {data.map((item, index) => (
+        <tr key={index}>
+          <td>{item.profit}%</td>
+          <td>{item.sport}</td>
+          <td>{item.game}</td>
+          <td>${item.o1}</td>
+          <td>${item.o2}</td>
+          <td>${item.o3}</td>
+          <td>{item.region}</td>
+        </tr>
+      ))}
+    </tbody>
+  );
+}
+
+// Main Table component
+function Table({ tableData }) {
   return (
     <div className="container">
       <h1>CRUD App</h1>
       <table className="table table-striped">
-        <thead>
-          <tr>
-            <th>Profit</th>
-            <th>League/Sport</th>
-            <th>Game</th>
-            <th>Outcome 1</th>
-            <th>Outcome 2</th>
-            <th>Outcome 3 (optional)</th>
-            <th>Region</th>
-          </tr>
-        </thead>
-        <tbody>
-          {tableData.map((item) => (
-            <tr key={item.id}>
-              <td>{item.id}</td>
-              <td>{item.name}</td>
-              <td>{item.age}</td>
-              <td>{item.email}</td>
-            </tr>
-          ))}
-        </tbody>
+        <TableHead />
+        <TableRows data={tableData} />
       </table>
     </div>
   );

@@ -15,7 +15,7 @@ def bundle():
 @app.route('/odds')
 def bix():
     data = arb_finder.test_sample_arb()
-    return data
+    return jsonify(data)
 
 if __name__ == '__main__':
     app.run()

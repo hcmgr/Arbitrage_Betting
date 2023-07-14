@@ -2,11 +2,11 @@ import React from 'react';
 import Table from './table'
 
 // Define a simple React component
-function App() {
+function App({ data }) {
     return (
         <div className="App">
-            <p> Tester React app because yes and now oh fuck me</p>
-            <Table />
+            <p>Ze music TM</p>
+            <Table tableData={data} />
         </div>
     );
 }
