@@ -49,7 +49,7 @@ This arb finder calculates all current arbitrage opportunities across 40 differe
     NOTE: may have to go into src/server/arb_finder.py and uncomment out
           arb_caller() in the main function
 
-### Instructions for running the website [For contributors and general interest]
+### Running the web app [NOTE: STILL UNDER CONSTRUCTION]
 If you want to actually host the full React app:
 
 5. Ensure you have node.js installed
