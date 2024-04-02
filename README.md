@@ -5,12 +5,7 @@
 [Arbitrage](https://en.wikipedia.org/wiki/Arbitrage_betting) opportunities allow one to make a guaranteed profit by betting both sides of a sports event. Because bookmakers aren't stupid, they always ensure no such opporunities arise from their own odds. However, they do not ensure this ACROSS bookmakers. For example, betting for and against Nadal at the same bookmaker always loses you money. However, betting for Nadal at SportsBet and against him at Pointsbet (ie: cross-betting), is occasionally profitable. By scowering these 'cross-bets', we can easily find arbitrage opportunities.
 
 ### Approach
-We've built a React app to display all current arbitrate opporunities across 40 different sports in 5 global markets. 
-
-### Stack
-Front-end: React, Boostrap
-
-Back-end: Flask web server, MongoDB database, hosted on personal Ubuntu droplet
+This arb finder calculates all current arbitrage opportunities across 40 different sports in 5 global markets.
 
 ## Installation
 
